@@ -5,7 +5,7 @@
 int bufferIndex;
 int memory[256];
 
-char commands[8] = { ',','.',':',';','(',')','`','-'};
+char commands[8] = { ',','.',':',';','(',')','`','-' };
 
 void interprete(std::string c)
 {
@@ -17,40 +17,40 @@ void interprete(std::string c)
 
         switch (command)
         {
-            case ',':
-                bufferIndex--;
-                break;
-            case '.':
-                bufferIndex++;
-                break;
-            case ':':
-                memory[bufferIndex]--;
-                break;
-            case ';':
-                memory[bufferIndex]++;
-                break;
-            case '(':
-                loopBegin = i;
-                break;
-            case ')':
-                if (memory[bufferIndex] != 0)
-                {
-                    i = loopBegin;
-                }
-                break;
-            case '`':
-                std::cout << memory[bufferIndex] << std::endl;
-                break;
-            case '-':
-                std::cout << char(memory[bufferIndex]) << std::endl;
-                break;
+        case ',':
+            bufferIndex--;
+            break;
+        case '.':
+            bufferIndex++;
+            break;
+        case ':':
+            memory[bufferIndex]--;
+            break;
+        case ';':
+            memory[bufferIndex]++;
+            break;
+        case '(':
+            loopBegin = i;
+            break;
+        case ')':
+            if (memory[bufferIndex] != 0)
+            {
+                i = loopBegin;
+            }
+            break;
+        case '`':
+            std::cout << memory[bufferIndex] << std::endl;
+            break;
+        case '-':
+            std::cout << char(memory[bufferIndex]) << std::endl;
+            break;
         }
     }
 }
 
 void printHelp()
 {
-    std::cout << "Welcome to Heebolang! Created by Sebastian Silvernagel" << std::endl;
+    std::cout << "Welcome to Heebolang! Created by Polybagel" << std::endl;
     std::cout << std::endl;
 
     std::cout << "Shift bit register left: ," << std::endl;
