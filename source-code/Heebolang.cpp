@@ -2,10 +2,30 @@
 #include <string>
 #include <stdlib.h>
 #include <fstream>
+#include <windows.h>
 
 int bufferIndex = 0;
 int memory[256];
 int loadedData = 0;
+
+const int canvasHeight = 15;
+const int canvasWidth = 30;
+
+int pixels[canvasWidth][canvasHeight];
+
+unsigned char b0 = ' ';
+unsigned char b1 = unsigned char(176);
+unsigned char b2 = unsigned char(177);
+unsigned char b3 = unsigned char(178);
+unsigned char b4 = unsigned char(219);
+
+unsigned char brightnesses[5] = {b0,b1,b2,b3,b4};
+
+struct coords
+{
+    int x;
+    int y;
+};
 
 std::string parsePath(std::string c, int startingIndex)
 {
@@ -39,6 +59,7 @@ int ReadFileToCell(std::string path)
         while (getline(myfile, line))
         {
             dataRead = std::stoi(line);
+
             memory[bufferIndex] = dataRead;
         }
         myfile.close();
@@ -47,6 +68,7 @@ int ReadFileToCell(std::string path)
     {
         std::cout << "Error reading file!" << std::endl;
     }
+
     return dataRead;
 }
 void WriteCellToFile(std::string path)
@@ -59,18 +81,98 @@ void WriteCellToFile(std::string path)
     }
 }
 
+unsigned char getColor(int b)
+{
+    return brightnesses[b];
+}
+
+void RenderCanvas()
+{
+    for (int y = 0; y < canvasHeight; y++)
+    {
+        for (int x = 0; x < canvasWidth; x++)
+        {
+            std::cout << getColor(pixels[x][y]);
+        }
+        std::cout << std::endl;
+    }
+}
+
+void PaintPixel(int x, int y, int b)
+{
+    if (x > canvasWidth) return; //is the pixel out of bounds? if so, ignore it.
+    if (x < 0) return;
+    if (y > canvasHeight) return;
+    if (y < 0) return;
+
+    //if not, set the pixel.
+    pixels[x][y] = b;
+}
+
+coords ParsePixelCoords(std::string c, int ind)
+{
+    coords result;
+    result.x = 0;
+    result.y = 0;
+
+    std::string xStr = "";
+    std::string yStr = "";
+
+    int progress = 0;
+
+    for (int i = ind; i < c.length(); i++)
+    {
+        char currentChar = c[i];
+        if (currentChar == '|') { progress++; }
+
+        if (currentChar != '{' && currentChar != '}' && currentChar != '|')
+        {
+            if (currentChar != 'i')
+            {
+                if (progress == 0) { xStr += currentChar; }
+                if (progress == 1) { yStr += currentChar; }
+            }
+            else
+            {
+                if (progress == 0) { 
+                    result.x = memory[bufferIndex]-1; 
+                }
+                if (progress == 1) { 
+                    result.y = memory[bufferIndex]-1; 
+                }
+            }
+        }
+
+        if (currentChar == '}')
+        {
+            return result;
+        }
+
+        if (xStr.length() > 0 && yStr.length() > 0)
+        {
+            result.x = std::stoi(xStr);
+            result.y = std::stoi(yStr);
+        }
+    }
+    return result;
+}
+
 void interprete(std::string c)
 {
     int loopBegin = 0; //the start of the current loop
 
+    //variables for storing file operations and where they are located in the code
+    int fileOperationStartIndex = 0;
+    std::string filePath;
+    bool parsingPath = false;
+
+    //variables for keeping track of graphics operations
+    int paintPixelStartIndex = 0;
+    bool parsingCoords = false;
+
     for (int i = 0; i < c.length(); i++)
     {
         char command = c[i]; //current character being interpreted
-
-        //variables for storing file operations and where they are located in the code
-        int fileOperationStartIndex = 0;
-        std::string filePath;
-        bool parsingPath = true;
 
         switch (command)
         {
@@ -120,6 +222,26 @@ void interprete(std::string c)
             case ']':
                 parsingPath = false; //if we've hit the end of the path container, now we can read the rest of the code
                 break;
+            case '@':
+                system("cls");
+                RenderCanvas();
+                break;
+            case '&':
+                for (int x = 0; x < canvasWidth; x++)
+                {
+                    for (int y = 0; y < canvasHeight; y++)
+                    {
+                        pixels[x][y] = 0;
+                    }
+                }
+                break;
+            case 'P':
+                paintPixelStartIndex = i + 1;
+                parsingCoords = true;
+                coords paintCoords = ParsePixelCoords(c, paintPixelStartIndex);
+                PaintPixel(paintCoords.x, paintCoords.y, 1);
+                parsingCoords = false;
+                break;
         }
     }
 }
@@ -153,13 +275,23 @@ void printHelp()
     std::cout << "Write current cell data to file: W[FILE PATH]" << std::endl;
 
     std::cout << std::endl;
+
+    std::cout << "Clear Canvas: &" << std::endl;
+    std::cout << "Render Canvas: @" << std::endl;
+    std::cout << "Paint Pixel: P{X|Y}" << std::endl;
+
+    std::cout << std::endl;
 }
 
 int main()
 {
+    SetConsoleTitle(TEXT("Heebolang Interpreter")); //Set console title
+
+
     std::string code; //where the written code is stored
 
     printHelp(); //print the help screen at the start of the program
+
 
     while (1) //infinite loop obviously lmao
     {
