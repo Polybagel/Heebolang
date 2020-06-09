@@ -242,6 +242,11 @@ void interprete(std::string c)
                 PaintPixel(paintCoords.x, paintCoords.y, 1);
                 parsingCoords = false;
                 break;
+            case '=':
+                std::string inp = " ";
+                std::cin >> inp;
+
+                memory[bufferIndex] = static_cast<unsigned char>(inp[0]);
         }
     }
 }
@@ -257,17 +262,18 @@ void printHelp()
 
     std::cout << std::endl;
 
-    std::cout << "decrement cell: :" << std::endl;
-    std::cout << "increment cell: ;" << std::endl;
+    std::cout << "Decrement cell: :" << std::endl;
+    std::cout << "Increment cell: ;" << std::endl;
 
     std::cout << std::endl;
 
-    std::cout << "loop: ()" << std::endl;
+    std::cout << "Loop: ()" << std::endl;
 
     std::cout << std::endl;
 
-    std::cout << "output current cell data(as integer): `" << std::endl;
-    std::cout << "output current cell data(as ascii) : -" << std::endl;
+    std::cout << "Output current cell data(as integer): `" << std::endl;
+    std::cout << "Output current cell data(as ascii) : -" << std::endl;
+    std::cout << "Take single key stroke and store its ASCII value into current cell: =" << std::endl;
 
     std::cout << std::endl;
 
